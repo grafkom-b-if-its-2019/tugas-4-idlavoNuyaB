@@ -1,33 +1,25 @@
 precision mediump float;
 
 attribute vec3 vPosition;
-attribute vec3 vColor;
-varying vec3 fColor;
-uniform vec3 theta;
+attribute vec3 vNormal;
+attribute vec2 vTexCoord;
+
+varying vec2 fTexCoord;
+varying vec3 fPosition;
+varying vec3 fNormal;
+
+uniform mat4 projection;
+uniform mat4 view;
+uniform mat4 model;
+
+uniform mat3 normalMatrix;
 
 void main() {
-  fColor = vColor;
-  vec3 angle = radians(theta);
-  vec3 c = cos(angle);
-  vec3 s = sin(angle);
-  mat4 rx = mat4(
-    1.0, 0.0, 0.0, 0.0,
-    0.0, c.x, s.x, 0.0,
-    0.0, -s.x, c.x, 0.0,
-    0.0, 0.0, 0.0, 1.0
-  );
-  mat4 ry = mat4(
-    c.y, 0.0, -s.y, 0.0,
-    0.0, 1.0, 0.0, 0.0,
-    s.y, 0.0, c.y, 0.0,
-    0.0, 0.0, 0.0, 1.0
-  );
-  mat4 rz = mat4(
-    c.z, s.z, 0.0, 0.0,
-    -s.z, c.z, 0.0, 0.0,
-    0.0, 0.0, 1.0, 0.0,
-    0.0, 0.0, 0.0, 1.0
-  );
-  gl_Position = rz * ry * rx * vec4(vPosition, 1.0);
+  gl_Position = projection * view * model * vec4(vPosition, 1.0);
+  // urutan perkaliannya harus = projection x view x model (transformasi)
 
+  fTexCoord = vTexCoord;
+  fPosition = vec3(model * vec4(vPosition, 1.0));
+  fNormal = normalMatrix * vNormal;
 }
+ 
