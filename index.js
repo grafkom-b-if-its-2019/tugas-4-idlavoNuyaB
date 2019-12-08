@@ -18,11 +18,9 @@
     var gerakz=Math.random()* 0.0085;
     var gerak=[0,0,0];
     var rotation=[0,0,0];
-    var rotate=1;
+    var rotate=0.05;
     //Cube
     var thetaCube = [0,0,0];  
-    var gcube=0;
-    var axis = 0;
     var xAxis = 0;
     var yAxis = 1;
     var zAxis = 2;
@@ -32,8 +30,8 @@
     var lightPositionLoc = gl.getUniformLocation(program2, 'lightPosition');
     var ambientColorLoc = gl.getUniformLocation(program2, 'ambientColor');
     var lightColor = [0.5, 0.5, 0.5];
-    var lightPosition = [1., 2., 1.7];
-    var ambientColor = glMatrix.vec3.fromValues(0.2, 0.2, 0.2);
+    var lightPosition = [gerak[0], gerak[1], -2 +gerak[2]];
+    var ambientColor = glMatrix.vec3.fromValues(0.05117, 0.4000, 0.0085);
     gl.uniform3fv(lightColorLoc, lightColor);
     gl.uniform3fv(lightPositionLoc, lightPosition);
     gl.uniform3fv(ambientColorLoc, ambientColor);
@@ -260,11 +258,6 @@
         -0.15,-0.65,0 
       ];
       matrixScaling(vertices,0.1);
-      // matrixTranslating(vertices,gerak[0],gerak[1],gerak[2]);
-      // rotation[0]+=(gerak[0]*0.01);
-      // rotation[2]+=(gerak[2]*0.01);
-      // rotation[1]+=(gerak[1]*0.01);
-      // matrixRotating(vertices,rotate*2.0,rotation[0],rotation[2]);
       var vertexBuffer = gl.createBuffer();
       gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
@@ -274,21 +267,24 @@
       // gl.vertexAttribPointer(aColor, 3, gl.FLOAT, gl.FALSE, 6 * Float32Array.BYTES_PER_ELEMENT, 3 * Float32Array.BYTES_PER_ELEMENT);
       gl.enableVertexAttribArray(aPosition);
       // gl.enableVertexAttribArray(aColor);
-      if(gerak[0]+0.15> 0.5 || gerak[0]-0.15 <-0.5){
+      if(gerak[0]+0.2> 0.5 || gerak[0]-0.2 <-0.5){
         gerakx*=-1;
-        rotate*=-1
+        rotate*=-1;
       }
       gerak[0]+=gerakx;
+      rotation[0]+=rotate;
       if(gerak[1]+0.2 > 0.5 || gerak[1]-0.2 <-0.5){
         geraky*=-1;
-        rotate*=-1
+        rotate*=-1;
       }
       gerak[1]+=geraky;
-      if(gerak[2] > 0.5  || gerak[2]-0.05 <-0.5){
+      rotation[1]+=rotate;
+      if(gerak[2]+0.05 > 0.5  || gerak[2]-0.05 <-0.5){
         gerakz*=-1;
-        rotate*=-1
+        rotate*=-1;
       }
       gerak[2]+=gerakz;
+      rotation[2]+=rotate;
       var vmLoc2 = gl.getUniformLocation(program, 'view');
       var pmLoc2 = gl.getUniformLocation(program, 'projection');
       var mmLoc = gl.getUniformLocation(program, 'model');
@@ -299,6 +295,13 @@
       glMatrix.mat4.translate(mm,mm,gerak);
       gl.uniformMatrix4fv(mmLoc, false, mm);
       gl.drawArrays(gl.TRIANGLES,0,42);
+      var mvpLoc=gl.getUniformLocation(program,'mvp');
+      var mvp=glMatrix.mat4.create();
+      glMatrix.mat4.multiply(mvp,vm,mm);
+      glMatrix.mat4.multiply(mvp,pm,mvp);
+      glMatrix.mat4.rotateX(mvp,mvp,rotation[xAxis]);
+      glMatrix.mat4.rotateY(mvp,mvp,rotation[yAxis]);
+      gl.uniformMatrix4fv(mvpLoc, false, mvp);
     }
     function render(){
       requestAnimationFrame(render);
