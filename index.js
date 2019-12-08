@@ -29,11 +29,10 @@
     var lightColorLoc = gl.getUniformLocation(program2, 'lightColor');
     var lightPositionLoc = gl.getUniformLocation(program2, 'lightPosition');
     var ambientColorLoc = gl.getUniformLocation(program2, 'ambientColor');
-    var lightColor = [0.5, 0.5, 0.5];
-    var lightPosition = [gerak[0], gerak[1], -2 +gerak[2]];
+    var lightColor = [0.1,0.2,0.3];
+    var lightPosition;
     var ambientColor = glMatrix.vec3.fromValues(0.05117, 0.4000, 0.0085);
     gl.uniform3fv(lightColorLoc, lightColor);
-    gl.uniform3fv(lightPositionLoc, lightPosition);
     gl.uniform3fv(ambientColorLoc, ambientColor);
     var vm = glMatrix.mat4.create();
     var pm = glMatrix.mat4.create();
@@ -258,6 +257,7 @@
         -0.15,-0.65,0 
       ];
       matrixScaling(vertices,0.1);
+      lightPosition = [gerak[0],gerak[1],-2+gerak[2]];
       var vertexBuffer = gl.createBuffer();
       gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
@@ -273,18 +273,21 @@
       }
       gerak[0]+=gerakx;
       rotation[0]+=rotate;
+      lightPosition[0]+=gerakx;
       if(gerak[1]+0.2 > 0.5 || gerak[1]-0.2 <-0.5){
         geraky*=-1;
         rotate*=-1;
       }
       gerak[1]+=geraky;
       rotation[1]+=rotate;
+      lightPosition[1]+=geraky;
       if(gerak[2]+0.05 > 0.5  || gerak[2]-0.05 <-0.5){
         gerakz*=-1;
         rotate*=-1;
       }
       gerak[2]+=gerakz;
       rotation[2]+=rotate;
+      lightPosition[2]+=gerakz;
       var vmLoc2 = gl.getUniformLocation(program, 'view');
       var pmLoc2 = gl.getUniformLocation(program, 'projection');
       var mmLoc = gl.getUniformLocation(program, 'model');
@@ -311,7 +314,9 @@
       // Bersihkan buffernya canvas
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
       cube();
-      rendersegitiga(); 
+      rendersegitiga();
+      gl.useProgram(program2);
+      gl.uniform3fv(lightPositionLoc, lightPosition); 
     } 
     // Membuat mekanisme pembacaan gambar jadi tekstur
     function initTexture(callback, args) {
